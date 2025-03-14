@@ -1,0 +1,69 @@
+#include <iostream>
+#include <string>
+#include <cstdlib>
+#include <ctime>
+
+using namespace std;
+
+struct Character {
+    string name;
+    int health;
+    int attack;
+    int defense;
+
+    void attackTarget(Character& target) {
+        int bonus = rand() % 5;
+        int damage = (attack + bonus) - target.defense;
+        if (damage < 0) damage = 0;
+        
+        cout << name << " атакует " << target.name << " и наносит " << damage << " урона.\n";
+        target.takeDamage(damage);
+    }
+
+    void takeDamage(int damage) {
+        health -= damage;
+        if (health < 0) health = 0;
+    }
+};
+
+void printStatus(const Character& hero, const Character& monster) {
+    cout << "\n=== Текущее состояние ===\n";
+    cout << hero.name << " (Здоровье: " << hero.health << ", Защита: " << hero.defense << ")\n";
+    cout << monster.name << " (Здоровье: " << monster.health << ", Защита: " << monster.defense << ")\n";
+    cout << "=========================\n\n";
+}
+
+int main() {
+    setlocale(LC_ALL, "Russian");
+    srand(time(0));
+
+    Character hero = { "Герой", 100, 15, 5 };
+    Character monster = { "Монстр", 80, 12, 3 };
+
+    while (hero.health > 0 && monster.health > 0) {
+        int choice;
+        cout << "Выберите действие:\n1. Атаковать\n2. Пропустить ход\nВаш выбор: ";
+        cin >> choice;
+
+        if (choice == 1) {
+            hero.attackTarget(monster);
+        } else {
+            cout << "Герой пропускает ход.\n";
+        }
+
+        if (monster.health > 0) {
+            cout << "Монстр наносит ответный удар!\n";
+            monster.attackTarget(hero);
+        }
+
+        printStatus(hero, monster);
+    }
+
+    if (hero.health > 0) {
+        cout << "Герой одержал победу!\n";
+    } else {
+        cout << "Монстр победил!\n";
+    }
+
+    return 0;
+}

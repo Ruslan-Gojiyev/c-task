@@ -1,0 +1,39 @@
+#include <iostream>
+#include <random>
+using namespace std;
+
+int main()
+{   int a=0;
+    int num;
+    while(a!=1){
+    setlocale(LC_ALL, "Russian");
+    random_device rd;
+    mt19937 gen(rd());
+    uniform_int_distribution<> distrib(1, 100);
+    int secNum = distrib(gen);
+    
+    while(1){
+        cout<<"Введите число: ";
+        while (!(cin >> num)){
+        cout << "Введено не число \n Введите число: ";
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        continue;
+        }
+        
+        if(num==secNum){
+            cout<<"Вы угадали число, поздравляю!"<<endl;
+            break;
+        }
+        else{
+            if(num<secNum){cout<<"Загаданное число больше"<<endl; continue;
+            }
+            else{
+                cout<<"Загаданное число меньше"<<endl;continue;
+            }
+        }
+    }
+    cout<<"Если хотите сыграть еше раз, введите 0, В противном случае 1\n";
+    cin>>a;    
+    }
+}

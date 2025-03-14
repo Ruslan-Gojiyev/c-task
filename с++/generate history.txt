@@ -1,0 +1,121 @@
+#include <iostream>
+#include <string>
+#include <vector>
+#include <random>
+#include <fstream>
+#include <limits>
+
+using namespace std;
+
+void initializeData(vector<string>& heroes, vector<string>& places, vector<string>& actions, vector<string>& details, int choice) {
+    if (choice == 1) { // Средневековье
+        heroes = {"смелый рыцарь", "волшебник", "отважный принц", "грозный варвар", "лучница"};
+        places = {"в далёком королевстве", "в мрачном замке", "в зачарованном лесу", "на поле битвы", "на турнире"};
+        actions = {"победил дракона", "нашёл магический артефакт", "выиграл сражение", "раскрыл заговор", "освободил пленника"};
+        details = {"с помощью заклинания", "используя древний меч", "в сопровождении феникса", "с невероятной ловкостью", "с помощью тайного знания"};
+    } else if (choice == 2) { // Фантастика
+        heroes = {"отважный капитан", "киборг-охранник", "инопланетный исследователь", "космический пират", "гениальный учёный"};
+        places = {"на борту звёздного корабля", "в глубинах космоса", "на неизвестной планете", "в центре галактики", "в секретной лаборатории"};
+        actions = {"спас цивилизацию", "обнаружил новую форму жизни", "разгадал межзвёздный сигнал", "создал искусственный интеллект", "остановил метеорит"};
+        details = {"используя нанотехнологии", "с гипердвигателем", "в сопровождении робота", "через пространственный портал", "с помощью антиматерии"};
+    } else { // Фэнтези
+        heroes = {"эльфийский лучник", "гном-кузнец", "маг огня", "друид", "тёмный чародей"};
+        places = {"в зачарованном лесу", "на вершине горы", "в древних руинах", "в подземелье", "на летающем острове"};
+        actions = {"разгадал древнюю тайну", "призвал духа стихий", "победил тёмного лорда", "нашёл священный артефакт", "спас деревню от проклятия"};
+        details = {"с помощью древних рун", "в сопровождении фамильяра", "через мистический ритуал", "с магической книгой", "благодаря предсказанию"};
+    }
+}
+
+string generateStory(const vector<string>& heroes, const vector<string>& places, const vector<string>& actions, const vector<string>& details) {
+    random_device rd;
+    mt19937 gen(rd());
+    uniform_int_distribution<> distrib(0, 4);
+
+    int heroIndex = distrib(gen);
+    int placeIndex = distrib(gen);
+    int actionIndex = distrib(gen);
+    int detailIndex = distrib(gen);
+
+    return heroes[heroIndex] + " " + places[placeIndex] + ", " + actions[actionIndex] + " " + details[detailIndex] + ".";
+}
+
+void saveStory(const string& story) {
+    char saveChoice;
+    cout << "\nСохранить историю в файл (stories.txt)? (Y/N): ";
+    cin >> saveChoice;
+
+    if (saveChoice == 'Y' || saveChoice == 'y') {
+        ofstream outFile("stories.txt", ios::app);
+        if (outFile.is_open()) {
+            outFile << story << "\n";
+            outFile.close();
+            cout << "История сохранена в файл stories.txt\n";
+        } else {
+            cout << "Ошибка открытия файла для записи!\n";
+        }
+    }
+}
+
+void loadStories() {
+    ifstream inFile("stories.txt");
+    if (!inFile) {
+        cout << "Файл stories.txt не найден или пуст.\n";
+        return;
+    }
+
+    cout << "\nСохранённые истории:\n";
+    string line;
+    while (getline(inFile, line)) {
+        cout << "- " << line << "\n";
+    }
+    inFile.close();
+}
+
+bool askPlayAgain() {
+    char playAgain;
+    cout << "\nХотите сгенерировать новую историю? (Y/N): ";
+    cin >> playAgain;
+    return (playAgain == 'Y' || playAgain == 'y');
+}
+
+int main() {
+    setlocale(LC_ALL, "Russian");
+
+    vector<string> heroes, places, actions, details;
+    
+    cout << "Выберите жанр истории:\n";
+    cout << "1 - Средневековье\n2 - Фантастика\n3 - Фэнтези\n";
+    
+    int choice;
+    while (true) {
+        cout << "Введите номер жанра: ";
+        cin >> choice;
+        if (cin.fail() || choice < 1 || choice > 3) {
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cout << "Ошибка! Введите число от 1 до 3.\n";
+        } else {
+            break;
+        }
+    }
+
+    initializeData(heroes, places, actions, details, choice);
+    
+    bool playAgain = true;
+    while (playAgain) {
+        string story = generateStory(heroes, places, actions, details);
+        cout << "\nСгенерированная история:\n" << story << endl;
+        saveStory(story);
+        playAgain = askPlayAgain();
+    }
+
+    cout << "\nХотите посмотреть сохранённые истории? (Y/N): ";
+    char viewStories;
+    cin >> viewStories;
+    if (viewStories == 'Y' || viewStories == 'y') {
+        loadStories();
+    }
+
+    cout << "\nСпасибо за игру! До свидания!\n";
+    return 0;
+}
