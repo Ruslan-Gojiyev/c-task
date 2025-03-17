@@ -1,0 +1,95 @@
+#include "raylib.h"
+#include <cstdlib>
+#include <ctime>
+
+const int screenWidth = 1280;
+const int screenHeight = 720;
+const int playerSize = 50;
+const int monsterSize = 60;
+
+struct Character {
+    Vector2 position;
+    int health;
+    int speed;
+    bool isAttacking;
+};
+
+Character player = {{100, 360}, 100, 5, false};
+Character monster = {{900, 360}, 80, 3, false};
+
+bool gameOver = false;
+bool battleStarted = false;
+
+void MoveMonster() {
+    if (!battleStarted) {
+        int moveDirection = rand() % 4;
+        if (moveDirection == 0) monster.position.x += monster.speed;
+        if (moveDirection == 1) monster.position.x -= monster.speed;
+        if (moveDirection == 2) monster.position.y += monster.speed;
+        if (moveDirection == 3) monster.position.y -= monster.speed;
+    }
+}
+
+
+bool CheckCollision() {
+    return (player.position.x < monster.position.x + monsterSize &&
+            player.position.x + playerSize > monster.position.x &&
+            player.position.y < monster.position.y + monsterSize &&
+            player.position.y + playerSize > monster.position.y);
+}
+
+int main() {
+    InitWindow(screenWidth, screenHeight, "Битва с монстром");
+    SetTargetFPS(60);
+    srand(time(nullptr));
+
+
+    while (!WindowShouldClose()) {
+
+        if (!gameOver) {
+            if (IsKeyDown(KEY_W)) player.position.y -= player.speed;
+            if (IsKeyDown(KEY_S)) player.position.y += player.speed;
+            if (IsKeyDown(KEY_A)) player.position.x -= player.speed;
+            if (IsKeyDown(KEY_D)) player.position.x += player.speed;
+        }
+
+        if (CheckCollision()) {
+            battleStarted = true;
+        }
+
+        if (battleStarted) {
+            if (IsKeyPressed(KEY_SPACE)) {
+                player.isAttacking = true;
+                monster.health -= 20;
+            }
+            if (monster.health <= 0) {
+                gameOver = true;
+            }
+        }
+
+        if (!battleStarted) {
+            MoveMonster();
+        }
+
+        BeginDrawing();
+        ClearBackground(RAYWHITE);
+
+        if (!gameOver) {
+            DrawText("Битва с монстром!", 500, 20, 30, DARKBLUE);
+            DrawText("Используйте WASD для передвижения, SPACE для атаки", 400, 60, 20, BLACK);
+            
+            DrawText(TextFormat("Здоровье Игрока: %d", player.health), 50, 650, 20, RED);
+            DrawText(TextFormat("Здоровье Монстра: %d", monster.health), 1000, 650, 20, DARKGREEN);
+            
+            DrawRectangle(player.position.x, player.position.y, playerSize, playerSize, BLUE);
+            DrawRectangle(monster.position.x, monster.position.y, monsterSize, monsterSize, RED);
+        } else {
+            DrawText("Вы победили монстра!", 500, 350, 40, GREEN);
+        }
+
+        EndDrawing();
+    }
+
+    CloseWindow();
+    return 0;
+}

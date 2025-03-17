@@ -1,0 +1,95 @@
+#include "raylib.h"
+#include <cstdlib>
+#include <ctime>
+#include <string>
+
+enum Choice { ROCK, PAPER, SCISSORS, NONE };
+enum Result { WIN, LOSE, DRAW };
+
+struct Game {
+    Choice playerChoice = NONE;
+    Choice computerChoice = NONE;
+    Result gameResult;
+    bool gameStarted = false;
+};
+
+Choice GetRandomChoice() {
+    return static_cast<Choice>(rand() % 3);
+}
+
+Result DetermineWinner(Choice player, Choice computer) {
+    if (player == computer) return DRAW;
+    if ((player == ROCK && computer == SCISSORS) ||
+        (player == SCISSORS && computer == PAPER) ||
+        (player == PAPER && computer == ROCK))
+        return WIN;
+    return LOSE;
+}
+
+void DrawGame(const Game &game) {
+    BeginDrawing();
+    ClearBackground(RAYWHITE);
+
+    DrawText("Камень, Ножницы, Бумага!", 100, 20, 30, DARKBLUE);
+    DrawText("Выберите ход: R (Камень), P (Бумага), S (Ножницы)", 50, 70, 20, BLACK);
+
+    DrawRectangle(100, 150, 150, 50, LIGHTGRAY);
+    DrawRectangle(300, 150, 150, 50, LIGHTGRAY);
+    DrawRectangle(500, 150, 150, 50, LIGHTGRAY);
+    DrawText("Камень", 130, 165, 20, BLACK);
+    DrawText("Бумага", 330, 165, 20, BLACK);
+    DrawText("Ножницы", 520, 165, 20, BLACK);
+
+    if (game.gameStarted) {
+        std::string playerStr = "Вы выбрали: " + std::string(game.playerChoice == ROCK ? "Камень" :
+                                                             game.playerChoice == PAPER ? "Бумага" : "Ножницы");
+        std::string compStr = "Компьютер выбрал: " + std::string(game.computerChoice == ROCK ? "Камень" :
+                                                                game.computerChoice == PAPER ? "Бумага" : "Ножницы");
+        DrawText(playerStr.c_str(), 100, 250, 20, BLACK);
+        DrawText(compStr.c_str(), 100, 280, 20, BLACK);
+
+        std::string resultStr = game.gameResult == WIN ? "Вы выиграли!" :
+                                game.gameResult == LOSE ? "Вы проиграли!" : "Ничья!";
+        DrawText(resultStr.c_str(), 100, 310, 30, game.gameResult == WIN ? GREEN :
+                                                  game.gameResult == LOSE ? RED : ORANGE);
+        DrawText("Нажмите SPACE для новой игры", 100, 350, 20, GRAY);
+    }
+
+    EndDrawing();
+}
+
+int main() {
+    InitWindow(800, 450, "Камень, Ножницы, Бумага");
+    SetTargetFPS(60);
+    srand(time(nullptr));
+
+    Game game;
+
+    while (!WindowShouldClose()) {
+        if (IsKeyPressed(KEY_R)) {
+            game.playerChoice = ROCK;
+            game.computerChoice = GetRandomChoice();
+            game.gameResult = DetermineWinner(game.playerChoice, game.computerChoice);
+            game.gameStarted = true;
+        } else if (IsKeyPressed(KEY_P)) {
+            game.playerChoice = PAPER;
+            game.computerChoice = GetRandomChoice();
+            game.gameResult = DetermineWinner(game.playerChoice, game.computerChoice);
+            game.gameStarted = true;
+        } else if (IsKeyPressed(KEY_S)) {
+            game.playerChoice = SCISSORS;
+            game.computerChoice = GetRandomChoice();
+            game.gameResult = DetermineWinner(game.playerChoice, game.computerChoice);
+            game.gameStarted = true;
+        }
+
+        if (game.gameStarted && IsKeyPressed(KEY_SPACE)) {
+            game.gameStarted = false;
+        }
+
+        DrawGame(game);
+    }
+
+    CloseWindow();
+    return 0;
+}
